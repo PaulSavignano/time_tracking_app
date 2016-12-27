@@ -186,44 +186,75 @@ const EditableTimer = React.createClass({
 });
 
 const TimerForm = React.createClass({
-  handleSubmit: function() {
+  getInitialState: function() {
+    return {
+      errorTitle: null,
+      errorProject: null
+    }
+  },
+  componentDidMount: function() {
+    this.handleValidation();
+  },
+  handleValidation: function() {
+    this.setState({
+      errorTitle: this.refs.title.value.length === 0 ? 'Cannot be empty' : null,
+      errorProject: this.refs.project.value.length === 0 ? 'Cannot be empty' : null
+    });
+  },
+  handleSubmit: function () {
+    if (this.state.errorTitle || this.state.errorProject) {
+      return;
+    }
     this.props.onFormSubmit({
       id: this.props.id,
       title: this.refs.title.value,
       project: this.refs.project.value,
     });
   },
-  render: function() {
+  getErrorMessage: function(errorMsg) {
+    if (errorMsg) {
+      return (
+        <div className="ui error message">
+          <p>{errorMsg}</p>
+        </div>
+      );
+    } else {
+      return null;
+    }
+  },
+  render: function () {
+    const errTitleMessage = this.getErrorMessage(this.state.errorTitle);
+    const errProjectMessage = this.getErrorMessage(this.state.errorProject);
     const submitText = this.props.id ? 'Update' : 'Create';
     return (
-      <div className="ui centered card">
-        <div className="content">
-          <div className="ui form">
-            <div className="field">
+      <div className='ui centered card'>
+        <div className='content'>
+          <div className='ui form error'>
+            <div className='field'>
               <label>Title</label>
-              <input
-                type="text"
-                ref="title"
+              {errTitleMessage}
+              <input type='text' ref='title'
                 defaultValue={this.props.title}
+                onChange={this.handleValidation}
               />
             </div>
-            <div className="field">
+            <div className='field'>
               <label>Project</label>
-              <input
-                type="text"
-                ref="project"
+              {errProjectMessage}
+              <input type='text' ref='project'
                 defaultValue={this.props.project}
+                onChange={this.handleValidation}
               />
             </div>
-            <div className="ui two button attached buttons">
+            <div className='ui two bottom attached buttons'>
               <button
-                className="ui basic blue button"
-                onClick={this.handleSubmit}
+                  className='ui basic blue button'
+                  onClick={this.handleSubmit}
               >
                 {submitText}
               </button>
               <button
-                className="ui basic red button"
+                className='ui basic red button'
                 onClick={this.props.onFormClose}
               >
                 Cancel
@@ -276,53 +307,78 @@ const ToggleableTimerForm = React.createClass({
 });
 
 const Timer = React.createClass({
-  componentDidMount: function() {
+  getInitialState: function() {
+    return {
+      showControls: false
+    }
+  },
+  componentDidMount: function () {
     this.forceUpdateInterval = setInterval(() => this.forceUpdate(), 50);
   },
-  componentWillUnmount: function() {
+  componentWillUnmount: function () {
     clearInterval(this.forceUpdateInterval);
   },
-  handleStartClick: function() {
+  handleStartClick: function () {
     this.props.onStartClick(this.props.id);
   },
-  handleStopClick: function() {
+  handleStopClick: function () {
     this.props.onStopClick(this.props.id);
   },
-  handleTrashClick: function() {
+  handleTrashClick: function () {
     this.props.onTrashClick(this.props.id);
+  },
+  handleMouseEnter: function() {
+    this.setState({
+      showControls: true
+    });
+  },
+  handleMouseLeave: function() {
+    this.setState({
+      showControls: false
+    });
+  },
+  getControls: function() {
+    return (
+      <div className='extra content'>
+        <span
+          className='right floated edit icon'
+          onClick={this.props.onEditClick}
+        >
+          <i className='edit icon'></i>
+        </span>
+        <span
+          className='right floated trash icon'
+          onClick={this.handleTrashClick}
+        >
+          <i className='trash icon'></i>
+        </span>
+      </div>
+    )
   },
   render: function() {
     const elapsedString = helpers.renderElapsedString(
       this.props.elapsed, this.props.runningSince
     );
+    const controls = this.state.showControls ? this.getControls() : null;
     return (
-      <div className="ui centered card">
-        <div className="content">
-          <div className="header">
+      <div
+        className='ui centered card'
+        onMouseEnter={this.handleMouseEnter}
+        onMouseLeave={this.handleMouseLeave}
+      >
+        <div className='content'>
+          <div className='header'>
             {this.props.title}
           </div>
-          <div className="meta">
+          <div className='meta'>
             {this.props.project}
           </div>
-          <div className="center aligned description">
+          <div className='center aligned description'>
             <h2>
               {elapsedString}
             </h2>
           </div>
-          <div className="extra content">
-            <span
-              className="right floated edit icon"
-              onClick={this.props.onEditClick}
-            >
-              <i className="edit icon"></i>
-            </span>
-            <span
-              className="right floated trash icon"
-              onClick={this.handleTrashClick}
-            >
-              <i className="trash icon"></i>
-            </span>
-          </div>
+          {controls}
         </div>
         <TimerActionButton
           timerIsRunning={!!this.props.runningSince}
