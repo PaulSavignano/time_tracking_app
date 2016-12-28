@@ -17,7 +17,14 @@
         "title": "Ponder origins of universe",
         "project": "Life Chores",
         "id": "2c43306e-5b44-4ff8-8753-33c35adbd06f",
-        "elapsed": 26475670310,
-        "runningSince": 1456468632194
+        "elapsed": 52891751589,
+        "runningSince": 1482884716588
+    },
+    {
+        "title": "Test",
+        "project": "Testing",
+        "id": "d747b66d-960a-4b47-b41f-25b6dac67433",
+        "elapsed": 32893,
+        "runningSince": null
     }
 ]
